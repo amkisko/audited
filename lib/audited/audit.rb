@@ -46,7 +46,7 @@ module Audited
     belongs_to :user, polymorphic: true
     belongs_to :associated, polymorphic: true
 
-    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address, :set_audit_context
+    before_create :set_version_number, :set_audit_user, :set_request_uuid, :set_remote_address, :set_audited_context
 
     def self.add_audited_class(audited_class)
       @@audited_classes ||= {}
@@ -61,8 +61,10 @@ module Audited
 
     if Rails.gem_version >= Gem::Version.new("7.1")
       serialize :audited_changes, coder: YAMLIfTextColumnType.new(self)
+      serialize :audited_context, coder: YAMLIfTextColumnType.new(self)
     else
       serialize :audited_changes, YAMLIfTextColumnType.new(self)
+      serialize :audited_context, YAMLIfTextColumnType.new(self)
     end
 
     scope :ascending, -> { reorder(version: :asc) }
@@ -204,8 +206,8 @@ module Audited
       self.remote_address ||= ::Audited.store[:current_remote_address]
     end
 
-    def set_audit_context
-      self.context = (::Audited.context || {}).merge(context || {})
+    def set_audited_context
+      self.audited_context = (::Audited.context || {}).merge(audited_context || {})
     end
   end
 end
