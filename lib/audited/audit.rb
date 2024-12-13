@@ -60,7 +60,6 @@ module Audited
       @@audited_classes[name] ||= Set.new
     end
 
-    
     def self.initialize_serializers
       if Rails.gem_version >= Gem::Version.new("7.1")
         serialize :audited_changes, coder: YAMLIfTextColumnType.new(self, "audited_changes")
