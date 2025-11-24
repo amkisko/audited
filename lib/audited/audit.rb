@@ -52,7 +52,7 @@ module Audited
     cattr_accessor :audited_class_names
     self.audited_class_names = Set.new
 
-    if Rails.gem_version >= Gem::Version.new("7.1")
+    if ::ActiveRecord.version >= Gem::Version.new("7.1")
       serialize :audited_changes, coder: YAMLIfTextColumnType.new(self, "audited_changes")
       serialize :audited_context, coder: YAMLIfTextColumnType.new(self, "audited_context")
     else
