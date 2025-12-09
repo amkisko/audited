@@ -52,9 +52,16 @@ appraise "rails80" do
   gem "sqlite3", ">= 1.4"
 end
 
+appraise "rails81" do
+  gem "rails", "~> 8.1.0"
+  gem "mysql2", "~> 0.5"
+  gem "pg", "~> 1.1"
+  gem "sqlite3", ">= 2.1"
+end
+
 appraise "rails_main" do
   gem "rails", github: "rails/rails", branch: "main"
   gem "mysql2", "~> 0.5"
   gem "pg", "~> 1.1"
-  gem "sqlite3", ">= 2.0"
+  gem "sqlite3", ">= 2.1"
 end
