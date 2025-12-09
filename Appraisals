@@ -15,6 +15,7 @@ appraise "rails60" do
   gem "mysql2", ">= 0.4.4"
   gem "pg", ">= 0.18", "< 2.0"
   gem "sqlite3", "~> 1.4"
+  gem "concurrent-ruby", "< 1.3.5"
 end
 
 appraise "rails61" do
@@ -22,6 +23,7 @@ appraise "rails61" do
   gem "mysql2", ">= 0.4.4"
   gem "pg", ">= 1.1", "< 2.0"
   gem "sqlite3", "~> 1.4"
+  gem "concurrent-ruby", "< 1.3.5"
 end
 
 appraise "rails70" do
