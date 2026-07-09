@@ -124,7 +124,7 @@ module Audited
         elsif class_provided.is_a? Class
           class_provided.name
         else
-          class_provided.to_s
+          class_provided.to_s.camelize
         end
         has_many :associated_audits, as: :associated, class_name: class_name
       end
