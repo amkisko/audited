@@ -115,8 +115,18 @@ module Audited
         enable_auditing
       end
 
-      def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: audit_class.name
+      def has_associated_audits(options = {})
+        # To hanlde custom audit model(per-model basis scenario)
+        # It can be class, string, symbol
+        class_provided = options[:as]
+        class_name = if class_provided.nil?
+          audit_class.name
+        elsif class_provided.is_a? Class
+          class_provided.name
+        else
+          class_provided.to_s
+        end
+        has_many :associated_audits, as: :associated, class_name: class_name
       end
 
       def update_audited_options(new_options)
