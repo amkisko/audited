@@ -120,7 +120,7 @@ module Audited
         # It can be class, string, symbol
         class_provided = options[:as]
         class_name = if class_provided.nil?
-          audit_class.name
+          (audit_class || Audited.audit_class).name
         elsif class_provided.is_a? Class
           class_provided.name
         else
