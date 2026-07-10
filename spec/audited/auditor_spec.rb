@@ -841,6 +841,100 @@ describe Audited::Auditor do
       expect(owner.associated_audits.length).to eq(1)
       expect(owner.associated_audits.first.auditable).to eq(owned_company)
     end
+
+    it "should work without audited when as: is provided" do
+      eval %(class NonAuditedOwner < ::ActiveRecord::Base
+        self.table_name = "users"
+        has_associated_audits as: Audited::Audit
+      end), binding, __FILE__, __LINE__
+
+      expect(NonAuditedOwner.reflect_on_association(:associated_audits).options[:class_name]).to eq("Audited::Audit")
+
+      Object.send(:remove_const, :NonAuditedOwner)
+    end
+
+    it "should fall back to Audited.audit_class without audited" do
+      eval %(class NonAuditedOwner < ::ActiveRecord::Base
+        self.table_name = "users"
+        has_associated_audits
+      end), binding, __FILE__, __LINE__
+
+      expect(NonAuditedOwner.reflect_on_association(:associated_audits).options[:class_name]).to eq("Audited::Audit")
+
+      Object.send(:remove_const, :NonAuditedOwner)
+    end
+
+    it "should raise when as: does not resolve to an audit class" do
+      expect {
+        eval %(class InvalidAssociatedOwner < ::ActiveRecord::Base
+          self.table_name = "users"
+          has_associated_audits as: "WrongAudit"
+        end), binding, __FILE__, __LINE__
+      }.to raise_error(StandardError, "No audit class resolved. Please specify existing audit class using the `:as` option.")
+    end
+
+    context "with a custom audit class on associated models" do
+      before do
+        eval %(class CustomOwnedCompany < ::ActiveRecord::Base
+          self.table_name = "companies"
+          belongs_to :owner, class_name: "CustomAuditOwner"
+          audited as: CustomAudit, associated_with: :owner
+        end), binding, __FILE__, __LINE__
+      end
+
+      after do
+        Object.send(:remove_const, :CustomAuditOwner) if defined?(CustomAuditOwner)
+        Object.send(:remove_const, :CustomOwnedCompany)
+      end
+
+      it "should not find associated audits when audit classes differ" do
+        eval %(class CustomAuditOwner < ::ActiveRecord::Base
+          self.table_name = "users"
+          audited
+          has_associated_audits
+          has_many :companies, class_name: "CustomOwnedCompany", foreign_key: :owner_id
+        end), binding, __FILE__, __LINE__
+
+        owner = CustomAuditOwner.create!(name: "custom owner")
+        CustomOwnedCompany.create!(name: "test co", owner: owner)
+
+        expect(CustomAuditOwner.reflect_on_association(:associated_audits).options[:class_name]).to eq("Audited::Audit")
+        expect(CustomAudit.where(associated: owner).count).to eq(1)
+        expect(owner.associated_audits.count).to eq(0)
+      end
+
+      it "should find associated audits when as: is a class" do
+        eval %(class CustomAuditOwner < ::ActiveRecord::Base
+          self.table_name = "users"
+          audited
+          has_associated_audits as: CustomAudit
+          has_many :companies, class_name: "CustomOwnedCompany", foreign_key: :owner_id
+        end), binding, __FILE__, __LINE__
+
+        owner = CustomAuditOwner.create!(name: "custom owner")
+        company = CustomOwnedCompany.create!(name: "test co", owner: owner)
+
+        expect(owner.associated_audits.count).to eq(1)
+        expect(owner.associated_audits.first).to eq(company.audits.first)
+      end
+
+      ["CustomAudit", :CustomAudit].each do |audit_class_option|
+        it "should find associated audits when as: is #{audit_class_option.inspect}" do
+          eval %(class CustomAuditOwner < ::ActiveRecord::Base
+            self.table_name = "users"
+            audited
+            has_associated_audits as: #{audit_class_option.inspect}
+            has_many :companies, class_name: "CustomOwnedCompany", foreign_key: :owner_id
+          end), binding, __FILE__, __LINE__
+
+          owner = CustomAuditOwner.create!(name: "custom owner")
+          company = CustomOwnedCompany.create!(name: "test co", owner: owner)
+
+          expect(owner.associated_audits.count).to eq(1)
+          expect(owner.associated_audits.first).to eq(company.audits.first)
+        end
+      end
+    end
   end
 
   describe "max_audits" do

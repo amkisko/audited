@@ -5,6 +5,10 @@ Audited
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
+## Deprecation Notice
+
+**Audited is deprecated.** Use [ActiveVersion](https://github.com/amkisko/active_version.rb) instead—it covers all Audited features (change logging, user attribution, associated audits, and more) and adds translations, revisions, sharding, PostgreSQL triggers, and configurable audit storage.
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
@@ -321,6 +325,27 @@ class Company < ActiveRecord::Base
   audited
   has_many :users
   has_associated_audits
+end
+```
+
+When associated models use a different audit class (for example a custom audit table), pass the same class to `has_associated_audits`:
+
+```ruby
+class Order < ActiveRecord::Base
+  audited as: OrderAudit, associated_with: :account
+end
+
+class Account < ActiveRecord::Base
+  audited
+  has_associated_audits as: OrderAudit
+end
+```
+
+`has_associated_audits` also works on models that are not audited. In that case, specify the audit class with `as:` or rely on `Audited.audit_class`:
+
+```ruby
+class Account < ActiveRecord::Base
+  has_associated_audits as: OrderAudit
 end
 ```
 
