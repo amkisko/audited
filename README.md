@@ -5,6 +5,10 @@ Audited
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 =======
 
+## Deprecation Notice
+
+**Audited is deprecated.** Use [ActiveVersion](https://github.com/amkisko/active_version.rb) instead—it covers all Audited features (change logging, user attribution, associated audits, and more) and adds translations, revisions, sharding, PostgreSQL triggers, and configurable audit storage.
+
 **Audited** (previously acts_as_audited) is an ORM extension that logs all changes to your models. Audited can also record who made those changes, save comments and associate models related to the changes.
 
 
