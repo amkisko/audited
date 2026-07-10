@@ -115,8 +115,25 @@ module Audited
         enable_auditing
       end
 
-      def has_associated_audits
-        has_many :associated_audits, as: :associated, class_name: audit_class.name
+      def has_associated_audits(options = {})
+        audit_klass = case options[:as]
+        when Class
+          options[:as]
+        when String, Symbol
+          options[:as].to_s.safe_constantize
+        else
+          if respond_to?(:audit_class, true) && audit_class
+            audit_class
+          else
+            Audited.audit_class
+          end
+        end
+
+        if audit_klass.nil?
+          raise "No audit class resolved. Please specify existing audit class using the `:as` option."
+        end
+
+        has_many :associated_audits, as: :associated, class_name: audit_klass.name
       end
 
       def update_audited_options(new_options)

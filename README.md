@@ -307,6 +307,27 @@ class Company < ActiveRecord::Base
 end
 ```
 
+When associated models use a different audit class (for example a custom audit table), pass the same class to `has_associated_audits`:
+
+```ruby
+class Order < ActiveRecord::Base
+  audited as: OrderAudit, associated_with: :account
+end
+
+class Account < ActiveRecord::Base
+  audited
+  has_associated_audits as: OrderAudit
+end
+```
+
+`has_associated_audits` also works on models that are not audited. In that case, specify the audit class with `as:` or rely on `Audited.audit_class`:
+
+```ruby
+class Account < ActiveRecord::Base
+  has_associated_audits as: OrderAudit
+end
+```
+
 Now, when an audit is created for a user, that user's company is also saved alongside the audit. This makes it much easier (and faster) to access audits indirectly related to a company.
 
 ```ruby
